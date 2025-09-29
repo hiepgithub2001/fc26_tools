@@ -101,7 +101,7 @@ def task_1s_press_ui_simultaneous():
     print(f"[P4: 1sQI] Process started. Running every ~{interval}s.")
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        print(f"[P4: {timestamp}] Press Q+I simultaneously.")
+        print(f"[P4: {timestamp}] Press U+I simultaneously.")
         press_simultaneous('u', 'i')
         
         # Simple sleep: Action is instantaneous, so sleep is full interval
