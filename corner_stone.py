@@ -85,7 +85,7 @@ def task_1s_random_move_hold_x():
 
 def task_1s_hold_enter():
     """3. Press Enter every 1s"""
-    interval = 1.0
+    interval = 10.0
     print(f"[P3: 1sE] Process started. Running every ~{interval}s.")
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
@@ -95,7 +95,7 @@ def task_1s_hold_enter():
         # Simple sleep: Action is instantaneous, so sleep is full interval
         time.sleep(interval)
 
-def task_1s_press_ui_simultaneous():
+def task_1s_press_qi_simultaneous():
     """4. (press Q + I at the same time) every 1s"""
     interval = 1.0
     print(f"[P4: 1sQI] Process started. Running every ~{interval}s.")
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # p1 = multiprocessing.Process(target=task_30s_cycle, daemon=True)
     p2 = multiprocessing.Process(target=task_1s_random_move_hold_x, daemon=True)
     p3 = multiprocessing.Process(target=task_1s_hold_enter, daemon=True)
-    p4 = multiprocessing.Process(target=task_1s_press_ui_simultaneous, daemon=True)
+    p4 = multiprocessing.Process(target=task_1s_press_qi_simultaneous, daemon=True)
 
     # 2. Start Processes
     # p1.start()
