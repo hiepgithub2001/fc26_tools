@@ -95,21 +95,32 @@ def task_1s_hold_enter():
         # Simple sleep: Action is instantaneous, so sleep is full interval
         time.sleep(interval)
 
+
 def task_1s_press_ui_simultaneous():
     """4. (press Q + I at the same time) every 1s"""
-    interval = 1.0
+    interval = 0.5
     print(f"[P4: 1sQI] Process started. Running every ~{interval}s.")
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        # thay nguoi
+        print("P4: Thay nguoi: hold o + press Enter")
+        keyboard.press('o')
+        time.sleep(0.5)
+        press_key(Key.enter)
+        time.sleep(0.5)
+        keyboard.release('o')
+
+        # bo qua
         print(f"[P4: {timestamp}] Press U+I simultaneously.")
         press_simultaneous('u', 'i')
-        
+
         # Simple sleep: Action is instantaneous, so sleep is full interval
-        time.sleep(interval) 
+        time.sleep(interval)
 
 # ----------------------------------------------------------------------
 # --- MAIN EXECUTION ---
 # ----------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     multiprocessing.freeze_support() 
@@ -120,13 +131,13 @@ if __name__ == '__main__':
     print("-" * 70)
 
     # 1. Create Processes (Daemon=True ensures they stop when the main script is interrupted)
-    # p1 = multiprocessing.Process(target=task_30s_cycle, daemon=True)
+    p1 = multiprocessing.Process(target=task_30s_cycle, daemon=True)
     p2 = multiprocessing.Process(target=task_1s_random_move_hold_x, daemon=True)
     p3 = multiprocessing.Process(target=task_1s_hold_enter, daemon=True)
     p4 = multiprocessing.Process(target=task_1s_press_ui_simultaneous, daemon=True)
 
     # 2. Start Processes
-    # p1.start()
+    p1.start()
     p2.start()
     p3.start()
     p4.start()
