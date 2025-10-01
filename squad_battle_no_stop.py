@@ -7,16 +7,8 @@ from pynput.keyboard import Controller, Key
 # --- Global Setup (Used by all processes) ---
 # Define directional keys for movement tasks.
 MOVE_DIRECTIONS = [
-<<<<<<< Updated upstream
 'h', 'b', 'm', 'n'
 ] 
-=======
-    'h',
-    'b',
-    'm',
-    'n'
-]
->>>>>>> Stashed changes
 
 keyboard = Controller()
 
@@ -49,11 +41,11 @@ def press_simultaneous(key1, key2):
 
 def task_change_rivals(): 
     """P1: (Press 's', hold Key.right 1s, press Enter) every 30s.""" 
-    interval = 15.0 
+    interval = 45.0 
     print(f"[P1: 30s] Process started. Running every ~{interval}s.") 
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3] 
-        print(f"[P1: {timestamp}] Running 30s Cycle.")         
+        print(f"[P1: {timestamp}] Running 45s Cycle.")         
         # 1a. Press S 
         press_key('s') 
         time.sleep(0.5) 
