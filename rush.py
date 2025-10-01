@@ -30,7 +30,7 @@ def hold_key(key, duration):
 
 def task_enter_hold():
     """1. Hold Enter 1s every 10s."""
-    interval = 10.0
+    interval = 15.0
     hold_duration = 1.0
     print(f"[P1: 10sE] Process started. Running every {interval}s.")
     

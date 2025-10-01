@@ -98,7 +98,7 @@ def task_1s_hold_enter():
 
 def task_1s_press_ui_simultaneous():
     """4. (press Q + I at the same time) every 1s"""
-    interval = 0.5
+    interval = 1.0
     print(f"[P4: 1sQI] Process started. Running every ~{interval}s.")
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
