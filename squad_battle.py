@@ -5,142 +5,179 @@ import multiprocessing
 from pynput.keyboard import Controller, Key
 
 # --- Global Setup (Used by all processes) ---
-# Note: keyboard controller is initialized implicitly in each process.
-MOVE_DIRECTIONS = [
-    'h',
-    'b', 
-    'm',
-    'n'
-    # Key.down  # avoid choose another tab bar
-]
+# Define the pool of keys for the first random task (P2: Movement).
+RANDOM_MOVE_KEYS = ['b', 'n', 'm', 'h']
+# Define the pool of keys for the second random task (P3: Weighted Attack/Action).
+# Keys are weighted: 'v' (4/8), 'e' (3/8), 'a' (1/8).
+RANDOM_ATTACK_KEYS = ['v', 'v', 'v', 'v', 'a', 'e', 'e', 'e']
 
+# Initialize the keyboard controller (needs to be initialized in the main process, 
+# and implicitly available in child processes via shared state or re-initialization).
 keyboard = Controller()
-# --- Key Press Utility Functions ---
 
-def press_key(key):
-    """Presses and immediately releases a key."""
-    keyboard.press(key)
-    time.sleep(0.5)
-    keyboard.release(key)
+# --- Key Press Utility Function ---
 
 def hold_key(key, duration):
     """Holds a specified key for a given duration (BLOCKING)."""
+    # Note: For pynput, using a string for alphabetical keys ('a', 'b') works well.
     keyboard.press(key)
     time.sleep(duration)
     keyboard.release(key)
-
-def press_simultaneous(key1, key2):
-    """Presses and releases two keys at the same time."""
-    keyboard.press(key1)
-    keyboard.press(key2)
-    time.sleep(0.5) # Minimal sleep for simultaneous press registration
-    keyboard.release(key1)
-    keyboard.release(key2)
-
-
+    
 # ----------------------------------------------------------------------
 # --- CONCURRENT PROCESS FUNCTIONS ---
 # ----------------------------------------------------------------------
 
-def task_30s_cycle():
-    """1. (press S, sleep 1s, press 'Move right', sleep 1s, press Enter) every 3s"""
-    interval = 30.0
-    print(f"[P1: 3s] Process started. Running every ~{interval}s.")
+def task_enter_hold():
+    """1. Hold Enter 1s every 10s. Cycle: Run 4h, Stop 1h."""
+    
+    # Cycle Configuration
+    RUN_DURATION = 14400.0  # 4 hours * 3600 seconds
+    STOP_DURATION = 3600.0   # 1 hour * 3600 seconds
+    
+    # Task Configuration
+    interval = 10.0
+    hold_duration = 1.0
+    print(f"[P1: 10sE] Process started. Cycle: R{RUN_DURATION/3600:.1f}h / S{STOP_DURATION/3600:.1f}h.")
+    
     while True:
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        print(f"[P1: {timestamp}] Running 30s Cycle.")
+        # --- RUN CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P1] RUNNING. Next stop in 4 hours.")
+        cycle_start = time.monotonic()
         
-        # 1a. Press S
-        press_key('s')
-        time.sleep(0.1)
-        
-        # 1b. Press Move right
-        hold_key(Key.right, 1)
-        
-        # 1c. Press Enter
-        press_key(Key.enter)
-        
-        # Approximate interval: Action takes ~2 seconds, so sleep is 1s
-        time.sleep(interval) 
+        while (time.monotonic() - cycle_start) < RUN_DURATION:
+            start_time = time.time()
+            timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            
+            print(f"[P1: {timestamp}] Holding ENTER for {hold_duration}s.")
+            
+            # Hold Enter for the required duration (1.0s)
+            hold_key(Key.enter, hold_duration)
+            
+            # Calculate time spent and sleep for the remainder of the 10s interval
+            time_spent = time.time() - start_time
+            sleep_time = interval - time_spent
+            
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
-def task_1s_random_move_hold_x():
-    """2. (press 'Move dir' random, sleep 1s, hold x random time [0.12- 1]) every 1s"""
-    # NOTE: The action itself takes 1.12s to 2.0s, so this task WILL cause drift.
-    interval = 1.0
-    print(f"[P2: 1sR] Process started. Running every ~{interval}s (Will drift).")
+        # --- STOP CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P1] STOPPING. Next run in 1 hour.")
+        time.sleep(STOP_DURATION)
+
+def task_random_move_hold():
+    """2. Every 0.1s, hold random of ('b', 'n', 'm', 'h') exactly 1s. Cycle: Run 4h30m, Stop 30m."""
+    
+    # Cycle Configuration
+    RUN_DURATION = 16200.0  # 4.5 hours * 3600 seconds
+    STOP_DURATION = 1800.0   # 0.5 hours (30 minutes) * 3600 seconds
+
+    # Task Configuration
+    interval = 0.1
+    hold_duration = 1.0
+    
+    print(f"[P2: 0.1sR] Process started. Cycle: R{RUN_DURATION/3600:.1f}h / S{STOP_DURATION/60:.1f}m.")
+    print(f"[P2: 0.1sR] ‼️ WARNING: Hold duration ({hold_duration}s) > interval ({interval}s). Significant time drift.")
+
     while True:
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+        # --- RUN CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P2] RUNNING. Next stop in 4.5 hours.")
+        cycle_start = time.monotonic()
         
-        # 2a. Press random move direction
-        direction_key = random.choice(MOVE_DIRECTIONS)
-        print(f"[P2: {timestamp}] Press {str(direction_key).replace('Key.', '').upper()} + Hold V.")
-        press_key(direction_key)
-        time.sleep(0.3)
-        
-        # 2b. Hold v for random time
-        hold_duration = random.uniform(0.1, 0.6)
-        hold_key('v', hold_duration)
-        
-        time.sleep(interval)
+        while (time.monotonic() - cycle_start) < RUN_DURATION:
+            start_time = time.time()
+            timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            
+            # Select random key from the updated list
+            random_key = random.choice(RANDOM_MOVE_KEYS)
+            
+            print(f"[P2: {timestamp}] Holding '{random_key}' for {hold_duration}s.")
+            
+            # Hold the key for the required duration (1.0s)
+            hold_key(random_key, hold_duration)
+            
+            # Calculate time spent and sleep for the remainder of the 0.1s interval
+            time_spent = time.time() - start_time
+            sleep_time = interval - time_spent 
+            
+            # Since the action is longer than the interval, we add a minimal sleep 
+            # to ensure the CPU scheduler has a moment before the next 1s hold starts.
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            else:
+                time.sleep(0.01) # Minimal sleep to prevent busy-waiting
 
-def task_1s_hold_enter():
-    """3. Press Enter every 1s"""
-    interval = 1.0
-    print(f"[P3: 1sE] Process started. Running every ~{interval}s.")
+        # --- STOP CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P2] STOPPING. Next run in 30 minutes.")
+        time.sleep(STOP_DURATION)
+
+def task_random_attack_hold():
+    """3. Every 0.1s hold random of ('v', 'v', 'v' , 'v', 'a', 'e', 'e', 'e') exactly 0.3s. Cycle: Run 4h30m, Stop 30m."""
+    
+    # Cycle Configuration
+    RUN_DURATION = 16200.0  # 4.5 hours * 3600 seconds
+    STOP_DURATION = 1800.0   # 0.5 hours (30 minutes) * 3600 seconds
+
+    # Task Configuration
+    interval = 0.1
+    hold_duration = 0.3
+    
+    print(f"[P3: 0.1sA] Process started. Cycle: R{RUN_DURATION/3600:.1f}h / S{STOP_DURATION/60:.1f}m.")
+    print(f"[P3: 0.1sA] ‼️ WARNING: Hold duration ({hold_duration}s) > interval ({interval}s). Significant time drift.")
+
     while True:
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        print(f"[P3: {timestamp}] Press Enter.")
-        hold_key(Key.enter, 1.0)
+        # --- RUN CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P3] RUNNING. Next stop in 4.5 hours.")
+        cycle_start = time.monotonic()
         
-        # Simple sleep: Action is instantaneous, so sleep is full interval
-        time.sleep(interval)
+        while (time.monotonic() - cycle_start) < RUN_DURATION:
+            start_time = time.time()
+            timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
+            
+            # Select random key from the weighted list
+            random_key = random.choice(RANDOM_ATTACK_KEYS)
+            
+            print(f"[P3: {timestamp}] Holding '{random_key}' for {hold_duration}s.")
+            
+            # Hold the key for the required duration (0.3s)
+            hold_key(random_key, hold_duration)
+            
+            # Calculate time spent and sleep for the remainder of the 0.1s interval
+            time_spent = time.time() - start_time
+            sleep_time = interval - time_spent 
+            
+            # Since the action is longer than the interval, we add a minimal sleep 
+            # to ensure the CPU scheduler has a moment.
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            else:
+                time.sleep(0.01) # Minimal sleep to prevent busy-waiting
 
-
-def task_1s_press_ui_simultaneous():
-    """4. (press Q + I at the same time) every 1s"""
-    interval = 1.0
-    print(f"[P4: 1sQI] Process started. Running every ~{interval}s.")
-    while True:
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3]
-        # thay nguoi
-        print("P4: Thay nguoi: hold o + press Enter")
-        keyboard.press('o')
-        time.sleep(0.5)
-        press_key(Key.enter)
-        time.sleep(0.5)
-        keyboard.release('o')
-
-        # bo qua
-        print(f"[P4: {timestamp}] Press U+I simultaneously.")
-        press_simultaneous('u', 'i')
-
-        # Simple sleep: Action is instantaneous, so sleep is full interval
-        time.sleep(interval)
+        # --- STOP CYCLE START ---
+        print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] [P3] STOPPING. Next run in 30 minutes.")
+        time.sleep(STOP_DURATION)
 
 # ----------------------------------------------------------------------
 # --- MAIN EXECUTION ---
 # ----------------------------------------------------------------------
 
-
 if __name__ == '__main__':
     multiprocessing.freeze_support() 
     
     print("-" * 70)
-    print("Starting 4 concurrent processes (Approximate Timing). Press Ctrl+C to stop.")
-    print("‼️ P2 (Random Move) will experience significant time drift.")
+    print("Starting 3 concurrent processes with scheduled run/stop cycles. Press Ctrl+C to stop.")
+    print("‼️ Remember P2 and P3 will drift during their run periods.")
     print("-" * 70)
 
     # 1. Create Processes (Daemon=True ensures they stop when the main script is interrupted)
-    # p1 = multiprocessing.Process(target=task_30s_cycle, daemon=True)
-    p2 = multiprocessing.Process(target=task_1s_random_move_hold_x, daemon=True)
-    p3 = multiprocessing.Process(target=task_1s_hold_enter, daemon=True)
-    p4 = multiprocessing.Process(target=task_1s_press_ui_simultaneous, daemon=True)
+    p1 = multiprocessing.Process(target=task_enter_hold, daemon=True)
+    p2 = multiprocessing.Process(target=task_random_move_hold, daemon=True)
+    p3 = multiprocessing.Process(target=task_random_attack_hold, daemon=True)
 
     # 2. Start Processes
-    # p1.start()
+    p1.start()
     p2.start()
     p3.start()
-    p4.start()
 
     # 3. Keep the main process alive
     try:
@@ -148,4 +185,4 @@ if __name__ == '__main__':
             time.sleep(1)
     except KeyboardInterrupt:
         print("-" * 70)
-        print("Script stopped.")
+        print("Script stopped. Waiting for child processes to terminate...")
