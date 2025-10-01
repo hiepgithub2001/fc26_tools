@@ -7,10 +7,7 @@ from pynput.keyboard import Controller, Key
 # --- Global Setup (Used by all processes) ---
 # Define directional keys for movement tasks.
 MOVE_DIRECTIONS = [
-    'h', 
-    'b',  
-    'm', 
-    'n' 
+'h', 'b', 'm', 'n'
 ] 
 
 keyboard = Controller()
