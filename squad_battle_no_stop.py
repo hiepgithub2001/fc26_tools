@@ -7,8 +7,16 @@ from pynput.keyboard import Controller, Key
 # --- Global Setup (Used by all processes) ---
 # Define directional keys for movement tasks.
 MOVE_DIRECTIONS = [
+<<<<<<< Updated upstream
 'h', 'b', 'm', 'n'
 ] 
+=======
+    'h',
+    'b',
+    'm',
+    'n'
+]
+>>>>>>> Stashed changes
 
 keyboard = Controller()
 
@@ -39,17 +47,16 @@ def press_simultaneous(key1, key2):
 # --- CONCURRENT PROCESS FUNCTIONS --- 
 # ---------------------------------------------------------------------- 
 
-def task_30s_cycle(): 
+def task_change_rivals(): 
     """P1: (Press 's', hold Key.right 1s, press Enter) every 30s.""" 
-    interval = 30.0 
+    interval = 15.0 
     print(f"[P1: 30s] Process started. Running every ~{interval}s.") 
-    while True: 
+    while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3] 
-        print(f"[P1: {timestamp}] Running 30s Cycle.") 
-         
+        print(f"[P1: {timestamp}] Running 30s Cycle.")         
         # 1a. Press S 
         press_key('s') 
-        time.sleep(0.1) 
+        time.sleep(0.5) 
          
         # 1b. Hold Move right for 1s
         hold_key(Key.right, 1) 
@@ -81,7 +88,7 @@ def task_1s_random_move_hold_x():
 
 def task_1s_hold_enter(): 
     """P3: Hold Enter 1s every 1s.""" 
-    interval = 1.0 
+    interval = 2.0 
     print(f"[P3: 1sE] Process started. Running every ~{interval}s.") 
     while True: 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3] 
@@ -89,7 +96,7 @@ def task_1s_hold_enter():
         hold_key(Key.enter, 1.0) 
          
         # Simple sleep: Action takes 1.0s, so sleep is the remainder of the 1.0s interval
-        time.sleep(interval - 1.0) # This should theoretically be 0 or very close to 0
+        time.sleep(interval) # This should theoretically be 0 or very close to 0
 
 def task_1s_press_ui_simultaneous(): 
     """P4: (Hold 'o' + press Enter, then press 'u' + 'i' simultaneously) every 1s.""" 
@@ -128,8 +135,7 @@ if __name__ == '__main__':
     print("-" * 70) 
 
     # 1. Create Processes (Daemon=True ensures they stop when the main script is interrupted) 
-    # P1 (task_30s_cycle) is commented out in your original logic.
-    p1 = multiprocessing.Process(target=task_30s_cycle, daemon=True) 
+    p1 = multiprocessing.Process(target=task_change_rivals, daemon=True) 
     p2 = multiprocessing.Process(target=task_1s_random_move_hold_x, daemon=True) 
     p3 = multiprocessing.Process(target=task_1s_hold_enter, daemon=True) 
     p4 = multiprocessing.Process(target=task_1s_press_ui_simultaneous, daemon=True) 
