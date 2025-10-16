@@ -42,7 +42,7 @@ def press_simultaneous(key1, key2):
 def task_change_rivals(): 
     """P1: (Press 's', hold Key.right 1s, press Enter) every 30s.""" 
     interval = 45.0 
-    print(f"[P1: 30s] Process started. Running every ~{interval}s.") 
+    print(f"[P1: 45s] Process started. Running every ~{interval}s.") 
     while True:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S.%f")[:-3] 
         print(f"[P1: {timestamp}] Running 45s Cycle.")         
@@ -127,13 +127,13 @@ if __name__ == '__main__':
     print("-" * 70) 
 
     # 1. Create Processes (Daemon=True ensures they stop when the main script is interrupted) 
-    p1 = multiprocessing.Process(target=task_change_rivals, daemon=True) 
+    # p1 = multiprocessing.Process(target=task_change_rivals, daemon=True) 
     p2 = multiprocessing.Process(target=task_1s_random_move_hold_x, daemon=True) 
     p3 = multiprocessing.Process(target=task_1s_hold_enter, daemon=True) 
     p4 = multiprocessing.Process(target=task_1s_press_ui_simultaneous, daemon=True) 
 
     # 2. Start Processes 
-    p1.start()
+    # p1.start()
     p2.start() 
     p3.start() 
     p4.start()
